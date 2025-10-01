@@ -1,15 +1,15 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, Phone, MapPin, Send, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Mail, Phone, MapPin, Loader2, Sparkles, Send } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const contactFormSchema = z.object({
   name: z.string()
@@ -31,15 +31,47 @@ type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAIHelping, setIsAIHelping] = useState(false);
   
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
   });
+
+  const messageValue = watch('message');
+
+  const getAIHelp = async () => {
+    if (!messageValue || messageValue.length < 10) {
+      toast.error("Please write a brief description of what you need help with (at least 10 characters).");
+      return;
+    }
+
+    setIsAIHelping(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-form-helper', {
+        body: { 
+          prompt: `Help me write a professional contact form message. Here's what I want to say: ${messageValue}`,
+          context: 'contact_form'
+        }
+      });
+
+      if (error) throw error;
+
+      setValue('message', data.suggestion);
+      toast.success("AI suggestion ready! Review and edit the message as needed before submitting.");
+    } catch (error) {
+      console.error('AI helper error:', error);
+      toast.error("Failed to get AI assistance. Please try again.");
+    } finally {
+      setIsAIHelping(false);
+    }
+  };
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
@@ -154,14 +186,36 @@ export const Contact = () => {
 
               <div>
                 <Label htmlFor="message">Message</Label>
-                <Textarea
-                  id="message"
-                  rows={6}
-                  placeholder="Tell us how we can help you..."
-                  {...register("message")}
-                  disabled={isSubmitting}
-                  className={errors.message ? "border-destructive" : ""}
-                />
+                <div className="space-y-2">
+                  <Textarea
+                    id="message"
+                    rows={6}
+                    placeholder="Tell us how we can help you..."
+                    {...register("message")}
+                    disabled={isSubmitting}
+                    className={errors.message ? "border-destructive" : ""}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={getAIHelp}
+                    disabled={isAIHelping || isSubmitting}
+                    className="w-full"
+                  >
+                    {isAIHelping ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Getting AI Help...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Improve with AI
+                      </>
+                    )}
+                  </Button>
+                </div>
                 {errors.message && (
                   <p className="text-sm text-destructive mt-1">{errors.message.message}</p>
                 )}
