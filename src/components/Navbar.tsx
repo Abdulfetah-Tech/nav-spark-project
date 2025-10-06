@@ -1,10 +1,28 @@
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -41,8 +59,17 @@ export const Navbar = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost">Sign In</Button>
-            <Button variant="accent">Get Started</Button>
+            {user ? (
+              <Button variant="accent" onClick={() => navigate("/dashboard")}>
+                <User className="mr-2 h-4 w-4" />
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
+                <Button variant="accent" onClick={() => navigate("/auth")}>Get Started</Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -69,8 +96,17 @@ export const Navbar = () => {
               </a>
             ))}
             <div className="flex flex-col space-y-2 mt-4">
-              <Button variant="ghost" className="w-full">Sign In</Button>
-              <Button variant="accent" className="w-full">Get Started</Button>
+              {user ? (
+                <Button variant="accent" className="w-full" onClick={() => navigate("/dashboard")}>
+                  <User className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+              ) : (
+                <>
+                  <Button variant="ghost" className="w-full" onClick={() => navigate("/auth")}>Sign In</Button>
+                  <Button variant="accent" className="w-full" onClick={() => navigate("/auth")}>Get Started</Button>
+                </>
+              )}
             </div>
           </div>
         )}
