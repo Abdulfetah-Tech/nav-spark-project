@@ -163,8 +163,13 @@ export default function Auth() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={6}
+                    minLength={12}
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{12,}$"
+                    title="Password must be at least 12 characters with uppercase, lowercase, and numbers"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Must be at least 12 characters with uppercase, lowercase, and numbers
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label>I am a</Label>
