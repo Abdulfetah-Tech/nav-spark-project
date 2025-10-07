@@ -30,6 +30,7 @@ export default function Auth() {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName,
+            user_type: userType,
           },
         },
       });
@@ -37,20 +38,6 @@ export default function Auth() {
       if (error) throw error;
 
       if (data.user) {
-        // Create profile
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert([{ user_id: data.user.id, full_name: fullName }]);
-
-        if (profileError) throw profileError;
-
-        // Create user role
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert([{ user_id: data.user.id, role: userType }]);
-
-        if (roleError) throw roleError;
-
         toast({
           title: "Account created!",
           description: "You've been logged in successfully.",

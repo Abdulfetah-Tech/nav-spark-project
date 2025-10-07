@@ -1,1 +1,10 @@
 project_id = "aaqvcqemqmrplohrngsv"
+
+[functions.ai-chat]
+verify_jwt = true
+
+[functions.ai-form-helper]
+verify_jwt = false
+
+[functions.ai-service-recommendations]
+verify_jwt = false

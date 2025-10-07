@@ -107,7 +107,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Contact form submitted successfully from:', clientIp);
+    console.log('Contact form submitted successfully');
 
     return new Response(
       JSON.stringify({ success: true, message: 'Message sent successfully!' }),
