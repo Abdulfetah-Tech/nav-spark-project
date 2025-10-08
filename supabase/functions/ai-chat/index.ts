@@ -6,38 +6,94 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Rate limiting configuration
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const MAX_REQUESTS_PER_MINUTE = 10;
+
+// Rate limit checker
+const checkRateLimit = (ip: string): boolean => {
+  const now = Date.now();
+  const limit = rateLimitMap.get(ip);
+  
+  if (!limit || now > limit.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + 60000 });
+    return true;
+  }
+  
+  if (limit.count >= MAX_REQUESTS_PER_MINUTE) {
+    return false;
+  }
+  
+  limit.count++;
+  return true;
+};
+
+// Input sanitization
+const sanitizeInput = (text: string): string => {
+  return text
+    .replace(/[<>]/g, '') // Remove potential XSS characters
+    .trim()
+    .slice(0, 4000); // Hard limit
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Rate limiting check
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+    
+    if (!checkRateLimit(clientIp)) {
+      console.warn(`Rate limit exceeded for IP: ${clientIp}`);
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please try again in a minute.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { messages } = await req.json();
     
-    // Input validation
+    // Validate and sanitize messages
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(
-        JSON.stringify({ error: 'Invalid message format' }),
+        JSON.stringify({ error: 'Messages array is required and must not be empty' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Length limit
-    if (JSON.stringify(messages).length > 4000) {
+    if (messages.length > 50) {
       return new Response(
-        JSON.stringify({ error: 'Message too long' }),
+        JSON.stringify({ error: 'Too many messages. Maximum 50 messages allowed.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Prevent system role injection
+    // Validate each message
     for (const msg of messages) {
-      if (msg.role === 'system') {
+      if (!msg.role || !msg.content) {
         return new Response(
-          JSON.stringify({ error: 'Invalid message format' }),
+          JSON.stringify({ error: 'Each message must have role and content' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      if (msg.role === 'system') {
+        return new Response(
+          JSON.stringify({ error: 'System role cannot be sent from client' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (typeof msg.content !== 'string' || msg.content.length > 4000) {
+        return new Response(
+          JSON.stringify({ error: 'Message content must be a string under 4000 characters' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      // Sanitize content
+      msg.content = sanitizeInput(msg.content);
     }
 
     // Content filtering for prompt injection
@@ -53,7 +109,7 @@ serve(async (req) => {
       for (const pattern of forbiddenPatterns) {
         if (pattern.test(message.content)) {
           return new Response(
-            JSON.stringify({ error: 'Invalid message content' }),
+            JSON.stringify({ error: 'Invalid message content detected' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
@@ -106,7 +162,7 @@ Be concise, friendly, and helpful. If users ask about specific services, recomme
       
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), 
+          JSON.stringify({ error: 'AI service rate limit exceeded. Please try again later.' }), 
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }

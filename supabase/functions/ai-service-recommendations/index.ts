@@ -6,24 +6,74 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Rate limiting configuration
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const MAX_REQUESTS_PER_MINUTE = 15;
+
+// Rate limit checker
+const checkRateLimit = (ip: string): boolean => {
+  const now = Date.now();
+  const limit = rateLimitMap.get(ip);
+  
+  if (!limit || now > limit.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + 60000 });
+    return true;
+  }
+  
+  if (limit.count >= MAX_REQUESTS_PER_MINUTE) {
+    return false;
+  }
+  
+  limit.count++;
+  return true;
+};
+
+// Input sanitization
+const sanitizeInput = (text: string): string => {
+  return text
+    .replace(/[<>]/g, '')
+    .trim()
+    .slice(0, 500);
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Rate limiting check
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+    
+    if (!checkRateLimit(clientIp)) {
+      console.warn(`Rate limit exceeded for IP: ${clientIp}`);
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please try again in a minute.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { userQuery } = await req.json();
     
-    // Input validation
-    if (!userQuery || typeof userQuery !== 'string' || userQuery.length > 500) {
+    // Validate userQuery
+    if (!userQuery || typeof userQuery !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Invalid query' }),
+        JSON.stringify({ error: 'userQuery is required and must be a string' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Rate limiting by IP
-    const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown';
+    if (userQuery.length > 500) {
+      return new Response(
+        JSON.stringify({ error: 'userQuery must be less than 500 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Sanitize input
+    const sanitizedQuery = sanitizeInput(userQuery);
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
@@ -63,7 +113,7 @@ Based on the user's query, recommend the most relevant services and explain why.
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userQuery }
+          { role: 'user', content: sanitizedQuery }
         ],
       }),
     });
