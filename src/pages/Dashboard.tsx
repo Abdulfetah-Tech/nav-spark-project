@@ -42,7 +42,18 @@ export default function Dashboard() {
         .eq("user_id", user.id)
         .single();
 
-      setRole(roleData?.role || "");
+      const userRole = roleData?.role || "";
+      setRole(userRole);
+      
+      // Redirect to role-specific dashboard
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (userRole === 'provider') {
+        navigate('/provider-dashboard');
+      } else if (userRole === 'customer') {
+        navigate('/customer-dashboard');
+      }
+      
       setIsLoading(false);
     };
 

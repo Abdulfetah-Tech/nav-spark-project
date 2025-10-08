@@ -124,6 +124,63 @@ export type Database = {
         }
         Relationships: []
       }
+      quotations: {
+        Row: {
+          booking_id: string
+          created_at: string | null
+          customer_id: string
+          description: string | null
+          estimated_duration: string | null
+          id: string
+          provider_id: string
+          quoted_price: number
+          status: string | null
+          updated_at: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string | null
+          customer_id: string
+          description?: string | null
+          estimated_duration?: string | null
+          id?: string
+          provider_id: string
+          quoted_price: number
+          status?: string | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string | null
+          customer_id?: string
+          description?: string | null
+          estimated_duration?: string | null
+          id?: string
+          provider_id?: string
+          quoted_price?: number
+          status?: string | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotations_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           booking_id: string
@@ -178,11 +235,13 @@ export type Database = {
           hourly_rate: number | null
           id: string
           rating: number | null
+          service_area: string | null
           service_type: string
           total_reviews: number | null
           updated_at: string | null
           user_id: string
           verified: boolean | null
+          years_experience: number | null
         }
         Insert: {
           availability?: Json | null
@@ -192,11 +251,13 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           rating?: number | null
+          service_area?: string | null
           service_type: string
           total_reviews?: number | null
           updated_at?: string | null
           user_id: string
           verified?: boolean | null
+          years_experience?: number | null
         }
         Update: {
           availability?: Json | null
@@ -206,11 +267,13 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           rating?: number | null
+          service_area?: string | null
           service_type?: string
           total_reviews?: number | null
           updated_at?: string | null
           user_id?: string
           verified?: boolean | null
+          years_experience?: number | null
         }
         Relationships: []
       }
