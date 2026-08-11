@@ -4,6 +4,7 @@ import listMyBookingsTool from "./tools/list-my-bookings";
 import createBookingTool from "./tools/create-booking";
 import listMyQuotationsTool from "./tools/list-my-quotations";
 import getMyProfileTool from "./tools/get-my-profile";
+import cancelBookingTool from "./tools/cancel-booking";
 
 const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unset";
 
@@ -21,6 +22,7 @@ export default defineMcp({
     searchServiceProvidersTool,
     listMyBookingsTool,
     createBookingTool,
+    cancelBookingTool,
     listMyQuotationsTool,
     getMyProfileTool,
   ],
