@@ -22,6 +22,7 @@ export default defineMcp({
     searchServiceProvidersTool,
     listMyBookingsTool,
     createBookingTool,
+    cancelBookingTool,
     listMyQuotationsTool,
     getMyProfileTool,
   ],
