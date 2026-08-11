@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,9 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [userType, setUserType] = useState<"customer" | "provider">("customer");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const rawNext = searchParams.get("next") ?? "";
+  const nextPath = /^\/(?!\/)/.test(rawNext) ? rawNext : "/";
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +30,7 @@ export default function Auth() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}${nextPath}`,
           data: {
             full_name: fullName,
             user_type: userType,
@@ -42,7 +45,7 @@ export default function Auth() {
           title: "Account created!",
           description: "You've been logged in successfully.",
         });
-        navigate("/");
+        navigate(nextPath);
       }
     } catch (error: any) {
       toast({
@@ -71,7 +74,7 @@ export default function Auth() {
         title: "Welcome back!",
         description: "You've been logged in successfully.",
       });
-      navigate("/");
+      navigate(nextPath);
     } catch (error: any) {
       toast({
         variant: "destructive",
