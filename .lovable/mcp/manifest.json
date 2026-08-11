@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.2",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://aaqvcqemqmrplohrngsv.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "fetan",
+      "version": "0.1.0",
+      "title": "fetan"
+    },
+    "tools": [
+      {
+        "name": "search_service_providers",
+        "title": "Search service providers",
+        "description": "Search Fetan service providers by service type or business name.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "service_type": {
+              "type": "string",
+              "description": "Service type filter, e.g. plumbing."
+            },
+            "query": {
+              "type": "string",
+              "description": "Text to match against business name."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_bookings",
+        "title": "List my bookings",
+        "description": "List bookings visible to the signed-in user (as customer or provider).",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Optional status filter, e.g. pending."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_booking",
+        "title": "Create a booking",
+        "description": "Create a service booking for the signed-in customer with a chosen provider.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "provider_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "ID of the service provider to book."
+            },
+            "service_type": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Type of service requested."
+            },
+            "scheduled_date": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Requested date/time (ISO 8601)."
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 2000,
+              "description": "Optional details for the provider."
+            }
+          },
+          "required": [
+            "provider_id",
+            "service_type",
+            "scheduled_date"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_quotations",
+        "title": "List my quotations",
+        "description": "List quotations visible to the signed-in user, newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Optional status filter, e.g. pending."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_my_profile",
+        "title": "Get my profile",
+        "description": "Get the signed-in user's Fetan profile details.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
