@@ -97,11 +97,21 @@ export const Navbar = () => {
               </a>
             ))}
             <div className="flex flex-col space-y-2 mt-4">
+              <ThemeToggle className="self-start" />
               {user ? (
-                <Button variant="accent" className="w-full" onClick={() => navigate("/dashboard")}>
-                  <User className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Button>
+                <>
+                  <Button variant="accent" className="w-full" onClick={() => { setIsOpen(false); navigate("/dashboard"); }}>
+                    Dashboard
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => { setIsOpen(false); navigate("/profile"); }}>
+                    <User className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Profile
+                  </Button>
+                  <Button variant="ghost" className="w-full" onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Sign out
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button variant="ghost" className="w-full" onClick={() => navigate("/auth")}>Sign In</Button>
@@ -109,6 +119,7 @@ export const Navbar = () => {
                 </>
               )}
             </div>
+
           </div>
         )}
       </div>
