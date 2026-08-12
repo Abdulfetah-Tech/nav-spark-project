@@ -1,0 +1,24 @@
+{
+  "name": "Fetan - Home Renovation & Maintenance Experts",
+  "short_name": "Fetan",
+  "description": "Book verified home renovation and maintenance professionals in Ethiopia.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#25a3ad",
+  "icons": [
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
