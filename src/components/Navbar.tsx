@@ -49,12 +49,21 @@ export const Navbar = () => {
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2">
+            <ThemeToggle />
             {user ? (
-              <Button variant="accent" onClick={() => navigate("/dashboard")}>
-                <User className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
+              <>
+                <Button variant="ghost" onClick={() => navigate("/profile")}>
+                  <User className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Profile
+                </Button>
+                <Button variant="accent" onClick={() => navigate("/dashboard")}>
+                  Dashboard
+                </Button>
+                <Button variant="ghost" size="icon" aria-label="Sign out" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
@@ -62,6 +71,7 @@ export const Navbar = () => {
               </>
             )}
           </div>
+
 
           {/* Mobile Menu Button */}
           <button
