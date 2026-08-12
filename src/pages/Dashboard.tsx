@@ -147,19 +147,17 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
-                    Create Service Listing
+                  <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/provider-dashboard")}>
+                    Manage listing & bookings
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    View Bookings
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    Manage Availability
+                  <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/profile")}>
+                    Edit profile
                   </Button>
                 </div>
               </CardContent>
             </Card>
           )}
+
 
           {role === "customer" && (
             <Card>
@@ -169,19 +167,17 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/")}>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/providers")}>
                     Browse Services
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/customer-dashboard")}>
                     My Bookings
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    Leave Review
                   </Button>
                 </div>
               </CardContent>
             </Card>
           )}
+
 
           <Card>
             <CardHeader>
@@ -189,11 +185,11 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/profile")}>
                   Edit Profile
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  Settings
+                <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/providers")}>
+                  Browse Services
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/")}>
                   Back to Home
@@ -201,6 +197,7 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
+
         </div>
       </div>
     </div>

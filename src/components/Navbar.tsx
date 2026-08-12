@@ -1,28 +1,19 @@
-import { useState, useEffect } from "react";
-import { Menu, X, User } from "lucide-react";
+import { useState } from "react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -58,12 +49,21 @@ export const Navbar = () => {
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2">
+            <ThemeToggle />
             {user ? (
-              <Button variant="accent" onClick={() => navigate("/dashboard")}>
-                <User className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
+              <>
+                <Button variant="ghost" onClick={() => navigate("/profile")}>
+                  <User className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Profile
+                </Button>
+                <Button variant="accent" onClick={() => navigate("/dashboard")}>
+                  Dashboard
+                </Button>
+                <Button variant="ghost" size="icon" aria-label="Sign out" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
@@ -71,6 +71,7 @@ export const Navbar = () => {
               </>
             )}
           </div>
+
 
           {/* Mobile Menu Button */}
           <button
@@ -96,11 +97,21 @@ export const Navbar = () => {
               </a>
             ))}
             <div className="flex flex-col space-y-2 mt-4">
+              <ThemeToggle className="self-start" />
               {user ? (
-                <Button variant="accent" className="w-full" onClick={() => navigate("/dashboard")}>
-                  <User className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Button>
+                <>
+                  <Button variant="accent" className="w-full" onClick={() => { setIsOpen(false); navigate("/dashboard"); }}>
+                    Dashboard
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => { setIsOpen(false); navigate("/profile"); }}>
+                    <User className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Profile
+                  </Button>
+                  <Button variant="ghost" className="w-full" onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Sign out
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button variant="ghost" className="w-full" onClick={() => navigate("/auth")}>Sign In</Button>
@@ -108,6 +119,7 @@ export const Navbar = () => {
                 </>
               )}
             </div>
+
           </div>
         )}
       </div>

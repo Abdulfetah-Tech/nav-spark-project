@@ -97,5 +97,17 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    /* Room for the mobile bottom tab bar */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  @media (max-width: 767px) {
+    body {
+      padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    }
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 }
